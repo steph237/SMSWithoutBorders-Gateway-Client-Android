@@ -7,11 +7,13 @@ import android.text.Spanned;
 import android.text.format.DateUtils;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
+
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toolbar;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.AsyncListDiffer;
@@ -51,11 +53,15 @@ public class SingleMessagesThreadRecyclerAdapter extends RecyclerView.Adapter{
         this.focusId = focusId;
         this.searchString = searchString;
         this.view = view;
+
     }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(this.context);
+
+
+
         switch(viewType) {
             // https://developer.android.com/reference/android/provider/Telephony.TextBasedSmsColumns#MESSAGE_TYPE_OUTBOX
             case 100: {
@@ -159,6 +165,8 @@ public class SingleMessagesThreadRecyclerAdapter extends RecyclerView.Adapter{
                 TextView dateView = ((MessageReceivedViewHandler)holder).date;
                 dateView.setVisibility(View.INVISIBLE);
                 dateView.setText(date);
+                Toolbar toolbarView = ((MessageReceivedViewHandler)holder).copy_toolbar;
+                toolbarView.setVisibility(View.GONE);
 
                 ((MessageReceivedViewHandler)holder).receivedMessage.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -171,6 +179,17 @@ public class SingleMessagesThreadRecyclerAdapter extends RecyclerView.Adapter{
                         }
                     }
                 });
+
+                ((MessageReceivedViewHandler)holder).receivedMessage.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View view) {
+                        toolbarView.setVisibility(View.VISIBLE);
+
+
+                        return false;
+                    }
+                });
+
                 break;
 
             case "2":
@@ -245,24 +264,47 @@ public class SingleMessagesThreadRecyclerAdapter extends RecyclerView.Adapter{
         TextView sentMessageStatus;
         TextView date;
         MaterialCardView layout;
+
+        Toolbar copy_toolbar;
+
         public MessageSentViewHandler(@NonNull View itemView) {
             super(itemView);
             sentMessage = itemView.findViewById(R.id.message_thread_sent_card_text);
             sentMessageStatus = itemView.findViewById(R.id.message_thread_sent_status_text);
             date = itemView.findViewById(R.id.message_thread_sent_date_text);
             layout = itemView.findViewById(R.id.text_sent_container);
+            copy_toolbar =  itemView.findViewById(R.id.fixed_toolbar);
+//            actionMenu(copy_toolbar);
         }
+
+
+
     }
 
     public class MessageReceivedViewHandler extends RecyclerView.ViewHolder {
         TextView receivedMessage;
         TextView date;
+        Toolbar copy_toolbar;
         public MessageReceivedViewHandler(@NonNull View itemView) {
             super(itemView);
             receivedMessage = itemView.findViewById(R.id.message_thread_received_card_text);
             date = itemView.findViewById(R.id.message_thread_received_date_text);
+            copy_toolbar = itemView.findViewById(R.id.fixed_toolbar);
+//            actionMenu(copy_toolbar);
+
         }
     }
+
+
+//    public void actionMenu(Toolbar copy_toolbar){
+//        copy_toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+//            @Override
+//            public boolean onMenuItemClick(MenuItem menuItem) {
+//                return false;
+//            }
+//        });
+//
+//    }
 
     public static final DiffUtil.ItemCallback<SMS> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<SMS>() {
